@@ -2,7 +2,7 @@
 ==========================================
 TradeBots
 Version: 0.0.1
-Oanda Connector Module
+Alpaca Connector Module
 ==========================================
 
 Authors: Connor Sanders and Daniel Pivalizza
@@ -11,10 +11,10 @@ Authors: Connor Sanders and Daniel Pivalizza
 import sys
 
 
-# Class that instantiates a new Oanda Connection
-class OandaConnector(object):
+# Class that instantiates a new Alpaca Connection
+class AlpacaConnector(object):
 
-    # Initialize an Oanda Connection
+    # Initialize an Alpaca Connection
     def __init__(self, secret_token, symbol):
 
         # Function that checks if token is valid
@@ -22,7 +22,7 @@ class OandaConnector(object):
             if secret_token:
                 # Write code here
                 return secret_token
-            print('Token is not recognized by Oanda')
+            print('Token is not recognized by Alpaca')
             sys.exit(1)
 
         # Function that check if symbol is valid upon bot instantiation
@@ -30,7 +30,7 @@ class OandaConnector(object):
             if symbol:
                 # Write code here
                 return symbol
-            print('Oanda Connector does not recognize the symbol, ' + str(symbol))
+            print('Alpaca Connector does not recognize the symbol, ' + str(symbol))
             sys.exit(1)
 
         self.secret_token = check_token(secret_token)
