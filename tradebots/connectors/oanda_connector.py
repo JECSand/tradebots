@@ -110,13 +110,21 @@ class OandaConnector(object):
                 base_get_url += '&smoothed=' + str(smoothed)
         return base_get_url
 
+    # Private static method to return Oanda's time scale factors
+    @staticmethod
+    def _get_time_scales(granularity):
+        scale = "".join([i for i in granularity if i.isalpha()])
+        interval = "".join([i for i in granularity if i.isdigit()])
+        time_scale = time_scaling_map[scale]
+        return [interval, time_scale]
+
     # Public Method that returns a dictionary of historical candle stick values
     def historical_candle_sticks(self, price=None, granularity=None, start=None, end=None, smoothed=None, count=None):
         start_dt = datetime.datetime.strptime(start.split('.')[0] + 'Z', '%Y-%m-%dT%H:%M:%SZ')
         end_dt = datetime.datetime.strptime(end.split('.')[0] + 'Z', '%Y-%m-%dT%H:%M:%SZ')
-        scale = "".join([i for i in granularity if i.isalpha()])
-        interval = "".join([i for i in granularity if i.isdigit()])
-        time_scale = time_scaling_map[scale]
+        time_scale_dict = self._get_time_scales(granularity)
+        interval = time_scale_dict[0]
+        time_scale = time_scale_dict[1]
         num_observations_data = math_utils.calc_num_of_observations(start_dt, end_dt, interval, time_scale)
         num_observations = num_observations_data[0]
         scaled_interval = num_observations_data[1]
@@ -158,7 +166,8 @@ class OandaConnector(object):
             return False
 
     # Private Method that formats returned candle stick pricing data
-    def _format_candle_stick_data(self, raw_candle_sticks, price='mid'):
+    @staticmethod
+    def _format_candle_stick_data(raw_candle_sticks, price='mid'):
         raw_candle_stick_prices = raw_candle_sticks['candles']
         candle_stick_prices = []
         for raw_candle_stick in raw_candle_stick_prices:
@@ -179,13 +188,16 @@ class OandaConnector(object):
         if current is True:
             # get last 20 days worth of candle stick data for submitted granularity; if less than M10, run multiple pulls
             end_dt = datetime.datetime.utcnow()
-            start_dt = end_dt - datetime.timedelta(days=22)
+            start_dt = end_dt - datetime.timedelta(days=45)
             end = end_dt.isoformat("T") + "Z"
             start = start_dt.isoformat("T") + "Z"
             raw_candle_sticks = self.historical_candle_sticks(None, granularity, start, end)
             candle_sticks = self._format_candle_stick_data(raw_candle_sticks)
             #TODO Calculate Bollinger Bands
-            return math_utils.calc_bollinger_values(candle_sticks['candles'])
+            time_scale_dict = self._get_time_scales(granularity)
+            interval = time_scale_dict[0]
+            time_scale = time_scale_dict[1]
+            return math_utils.calc_bollinger_values(candle_sticks['candles'], interval, time_scale)
         else:
             pass
         pass

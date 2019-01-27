@@ -12,8 +12,8 @@ from tradebots import BollingerBot
 
 
 # Test Connection here
-api_token = 'YOURTOKENHERE'
-acct_id = 'YOURACCOUNTHERE'
+api_token = 'YOURTOKEN'
+acct_id = 'YOURACCOUNT'
 symb = 'EUR_USD'
 new_bollinger_bot = BollingerBot('oanda', api_token, acct_id, symb)
 
@@ -32,9 +32,9 @@ def check_candle_sticks():
 
 def check_bollinger_bands():
     print('bollinger band check')
-    granularity = 'S30'
+    granularity = 'M10'
     bolinger_bands = new_bollinger_bot.bollinger_bands(granularity)
-    print(bolinger_bands)
+    #print(bolinger_bands)
 
 
 check_bollinger_bands()

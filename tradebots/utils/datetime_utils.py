@@ -7,6 +7,7 @@ DateTime Utility Functions
 
 Authors: Connor Sanders
 """
+
 import datetime
 
 
