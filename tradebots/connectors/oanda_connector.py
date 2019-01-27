@@ -5,7 +5,7 @@ Version: 0.0.1
 Oanda Connector Module
 ==========================================
 
-Authors: Connor Sanders and Daniel Pivalizza
+Authors: Connor Sanders
 """
 
 import sys
@@ -49,7 +49,7 @@ class OandaConnector(object):
                     print('setup error: Token is not recognized by Oanda')
                     sys.exit(1)
                 else:
-                    res_list = json.loads(get_req.read()).get(check_type, None)
+                    res_list = json.loads(get_req.read().decode('utf8')).get(check_type, None)
                     if res_list is not None and len(res_list) > 0:
                         for res_obj in res_list:
                             if res_obj.get(check_key, None) == check_param:
@@ -120,7 +120,6 @@ class OandaConnector(object):
         num_observations_data = math_utils.calc_num_of_observations(start_dt, end_dt, interval, time_scale)
         num_observations = num_observations_data[0]
         scaled_interval = num_observations_data[1]
-        print(num_observations)
         seconds_per_request = int(scaled_interval * 3000)
         num_of_requests = int(num_observations / 3000)
         date_ranges_list = datetime_utils.generate_dt_range_map(num_of_requests, seconds_per_request, end_dt, start_dt)
@@ -132,13 +131,12 @@ class OandaConnector(object):
             c_end = datetime_list[1].isoformat("T") + "Z"
             get_url = self._generate_candle_stick_url(base_get_url, price, granularity, c_start, c_end, smoothed, count)
             try:
-                print(get_url)
                 get_req = request_utils.get_request(get_url, self.base_headers)
                 if get_req:
                     if get_req.code != 200:
                         appended_re_candle_data.append({c_start + ' to ' + c_end: False})
                     else:
-                        re_data = json.loads(get_req.read())
+                        re_data = json.loads((get_req.read().decode('utf8')))
                         if len(appended_re_candle_data) > 0:
                             appended_re_candle_data += re_data['candles']
                         else:
@@ -159,6 +157,23 @@ class OandaConnector(object):
         except:
             return False
 
+    # Private Method that formats returned candle stick pricing data
+    def _format_candle_stick_data(self, raw_candle_sticks, price='mid'):
+        raw_candle_stick_prices = raw_candle_sticks['candles']
+        candle_stick_prices = []
+        for raw_candle_stick in raw_candle_stick_prices:
+            formated_candle_stick_obj = {
+                'volume': float(raw_candle_stick['volume']),
+                'time': raw_candle_stick['time'],
+                'high': float(raw_candle_stick[price].get('h', None)),
+                'close': float(raw_candle_stick[price].get('c', None)),
+                'open': float(raw_candle_stick[price].get('o', None)),
+                'low': float(raw_candle_stick[price].get('l', None)),
+            }
+            candle_stick_prices.append(formated_candle_stick_obj)
+        raw_candle_sticks.update({'candles': candle_stick_prices})
+        return raw_candle_sticks
+
     # Public Method that returns a dictionary of current bollinger band values
     def bollinger_band_data(self, granularity, current=True, start=None, end=None):
         if current is True:
@@ -167,9 +182,10 @@ class OandaConnector(object):
             start_dt = end_dt - datetime.timedelta(days=22)
             end = end_dt.isoformat("T") + "Z"
             start = start_dt.isoformat("T") + "Z"
-            candle_sticks = self.historical_candle_sticks(None, granularity, start, end)
+            raw_candle_sticks = self.historical_candle_sticks(None, granularity, start, end)
+            candle_sticks = self._format_candle_stick_data(raw_candle_sticks)
             #TODO Calculate Bollinger Bands
-            return None
+            return math_utils.calc_bollinger_values(candle_sticks['candles'])
         else:
             pass
         pass

@@ -5,10 +5,11 @@ Version: 0.0.1
 Math Utility Functions
 ==========================================
 
-Authors: Connor Sanders and Daniel Pivalizza
+Authors: Connor Sanders
 """
 
-import datetime
+import json
+import pandas as pd
 
 
 # Base Interval Mapping Dict
@@ -40,7 +41,11 @@ def calc_num_of_observations(start, end, interval, scale):
     return [int(divmod(duration_in_s, scaled_interval)[0]), scaled_interval]
 
 
-# Function to calculate standard deviation
+# Function to calculate bollinger values
+def calc_bollinger_values(candlestick_dicts):
+    df = pd.DataFrame(candlestick_dicts)
+    df = df.set_index('time')
+    return df
 
 
 # Function to calculate moving average

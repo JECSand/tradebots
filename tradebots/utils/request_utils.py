@@ -5,7 +5,7 @@ Version: 0.0.1
 Request Utility Functions
 ==========================================
 
-Authors: Connor Sanders and Daniel Pivalizza
+Authors: Connor Sanders
 """
 
 import sys
@@ -37,7 +37,7 @@ def handle_request(url, req_type, headers, req_data=None, i=0):
        return None
     try:
         if req_data is None:
-            res =  base_request(url, req_type, headers)
+            res = base_request(url, req_type, headers)
         else:
             res = base_request(url, req_type, headers, req_data)
         if res.code == 500:

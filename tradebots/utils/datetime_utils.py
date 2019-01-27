@@ -5,7 +5,7 @@ Version: 0.0.1
 DateTime Utility Functions
 ==========================================
 
-Authors: Connor Sanders and Daniel Pivalizza
+Authors: Connor Sanders
 """
 import datetime
 

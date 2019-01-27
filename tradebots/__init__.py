@@ -5,7 +5,7 @@ Version: 0.0.1
 Main Module
 ==========================================
 
-Authors: Connor Sanders and Daniel Pivalizza
+Authors: Connor Sanders
 """
 
 from tradebots.connectors.oanda_connector import OandaConnector

@@ -5,15 +5,15 @@ Version: 0.0.1
 Connectors Test Module
 ==========================================
 
-Authors: Connor Sanders and Daniel Pivalizza
+Authors: Connor Sanders
 """
 
 from tradebots import BollingerBot
 
 
 # Test Connection here
-api_token = '82f567a3bd7ad23c5fc4cd0e0612b212-b7fd6ff8fcd955de2f22bf19a96f6d35'
-acct_id = '101-001-10278207-002'
+api_token = 'YOURTOKENHERE'
+acct_id = 'YOURACCOUNTHERE'
 symb = 'EUR_USD'
 new_bollinger_bot = BollingerBot('oanda', api_token, acct_id, symb)
 
