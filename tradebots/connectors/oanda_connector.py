@@ -183,12 +183,17 @@ class OandaConnector(object):
         raw_candle_sticks.update({'candles': candle_stick_prices})
         return raw_candle_sticks
 
+    # Public Method to get RSI data
+    @staticmethod
+    def rsi_data(candlesticks_dataframe):
+        return math_utils.calc_rsi_values(candlesticks_dataframe)
+
     # Public Method that returns a dictionary of current bollinger band values
     def bollinger_band_data(self, granularity, current=True, start=None, end=None):
         if current is True:
             # get last 20 days worth of candle stick data for submitted granularity; if less than M10, run multiple pulls
             end_dt = datetime.datetime.utcnow()
-            start_dt = end_dt - datetime.timedelta(days=45)
+            start_dt = end_dt - datetime.timedelta(days=22)
             end = end_dt.isoformat("T") + "Z"
             start = start_dt.isoformat("T") + "Z"
             raw_candle_sticks = self.historical_candle_sticks(None, granularity, start, end)

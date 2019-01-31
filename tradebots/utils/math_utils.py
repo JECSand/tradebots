@@ -9,7 +9,9 @@ Authors: Connor Sanders
 """
 
 import matplotlib.pyplot as plt
+import math
 import pandas as pd
+import numpy as np
 
 
 # Base Interval Mapping Dict
@@ -51,22 +53,55 @@ def calc_num_of_observations(start, end, interval, scale):
     return [int(divmod(duration_in_s, scaled_interval)[0]), scaled_interval]
 
 
+# Function to calculate stock's RSI
+def calc_rsi(price):
+    avg_gain = price[price > 0].sum() / n
+    avg_loss = -price[price < 0].sum() / n
+    rs = avg_gain / avg_loss
+    return 100 - 100 / (1 + rs)
+
+
+def calc_rsi_values(candlestick_dicts, n=14):
+    df = pd.DataFrame(candlestick_dicts)
+    df['rsi'] = (df['close'] - df['close'].shift(1)).fillna(0)
+    return pd.rolling_apply(df, n, calc_rsi)
+
+
 # Function to calculate bollinger values
 def calc_bollinger_values(candlestick_dicts, interval, time_scale):
-    print(candlestick_dicts)
+    #print(candlestick_dicts)
     df = pd.DataFrame(candlestick_dicts)
     if time_scale == 'days':
-        df['moving_average'] = df['close'].rolling(window=22).mean()
+        df['moving_average'] = df['close'].rolling(window=45).mean()
     else:
         num_periods = int(calc_num_periods(interval, time_scale))
         print(num_periods)
-        df['moving_average'] = df['close'].rolling(window=100).mean()
-        df['standard_deviation'] = df['close'].rolling(window=100).std()
+        delta = df.close.diff()
+        up_days = delta.copy()
+        up_days[delta <= 0] = 0.0
+        down_days = abs(delta.copy())
+        down_days[delta > 0] = 0.0
+        RS_up = up_days.rolling(window=17).mean()
+        RS_down = down_days.rolling(window=17).mean()
+        df['rsi'] = 100 - 100 / (1 + RS_up / RS_down)
+        df['moving_average'] = df['close'].rolling(window=200).mean()
+        df['standard_deviation'] = df['close'].rolling(window=200).std()
         df['upper_band'] = df['moving_average'] + (df['standard_deviation'] * 2)
         df['lower_band'] = df['moving_average'] - (df['standard_deviation'] * 2)
+        df['band_diff'] = df['upper_band'] - df['lower_band']
     df = df.set_index('time')
-    df[['close', 'moving_average', 'upper_band', 'lower_band']].plot(figsize=(24, 12))
-    plt.title('30 Day Bollinger Band for Facebook')
-    plt.ylabel('Price (USD)')
-    plt.show()
-    #return df
+    #df[['close', 'moving_average', 'upper_band', 'lower_band']].plot(figsize=(24, 12))
+    #plt.title('30 Day Bollinger Band Chart')
+    #plt.ylabel('Price (USD)')
+    #plt.show()
+    return df.dropna()
+
+
+# Function that calculates a
+def sigmoid(x):
+    return 1.0 / (1 + np.exp(-x))
+
+
+# Function that calculates the derivative of a sigmoid
+def sigmoid_derivative(x):
+    return x * (1.0 - x)
